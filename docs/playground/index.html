@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US HMDA 2022 to 2025 - SQL Playground</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ctext y=%2726%27 font-size=%2728%27%3E%F0%9F%8F%A6%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #fbfaf8; --panel: #ffffff; --ink: #1c1b19; --muted: #6b6862;
+    --line: #e3e0da; --accent: #8a5a2b; --accent-soft: #f2ece4;
+    --ok: #2f6b45; --err: #9b2c2c; --code: #f6f4f0;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171614; --panel: #1f1e1b; --ink: #ece9e3; --muted: #9c978e;
+      --line: #322f2a; --accent: #d9a468; --accent-soft: #2a2520;
+      --ok: #7fbf96; --err: #e08c8c; --code: #232120;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171614; --panel: #1f1e1b; --ink: #ece9e3; --muted: #9c978e;
+    --line: #322f2a; --accent: #d9a468; --accent-soft: #2a2520;
+    --ok: #7fbf96; --err: #e08c8c; --code: #232120;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 var(--sans); -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 24px; }
+  h1 { font-size: 1.45rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 0.92rem; margin: 0; }
+  .sub b { color: var(--ink); font-weight: 600; }
+  .status {
+    display: flex; align-items: center; gap: 8px; margin: 18px 0;
+    font-size: 0.88rem; color: var(--muted);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.loading { background: var(--accent); animation: pulse 1.1s ease-in-out infinite; }
+  .dot.ready { background: var(--ok); }
+  .dot.error { background: var(--err); }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.25 } }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  select, button {
+    font: inherit; color: var(--ink); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px;
+  }
+  select { max-width: 100%; flex: 1 1 320px; }
+  button { cursor: pointer; }
+  button.run { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  textarea {
+    width: 100%; min-height: 230px; resize: vertical;
+    font: 13px/1.6 var(--mono); color: var(--ink);
+    background: var(--code); border: 1px solid var(--line);
+    border-radius: 9px; padding: 14px; tab-size: 2;
+  }
+  .hint { font-size: 0.8rem; color: var(--muted); margin: 8px 0 0; }
+  kbd {
+    font: 0.85em var(--mono); background: var(--code); border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px;
+  }
+  .meta { font-size: 0.83rem; color: var(--muted); margin: 14px 0 0; font-variant-numeric: tabular-nums; }
+  .meta .bad { color: var(--err); }
+  .scroller { overflow-x: auto; margin-top: 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { background: var(--accent-soft); font-weight: 600; position: sticky; top: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 0.82rem; }
+  tr:last-child td { border-bottom: 0; }
+  pre.error {
+    margin-top: 14px; padding: 12px 14px; border-radius: 9px;
+    background: var(--code); border: 1px solid var(--err); color: var(--err);
+    font: 12.5px/1.5 var(--mono); white-space: pre-wrap; overflow-x: auto;
+  }
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
+  footer p { margin: 0 0 8px; }
+  code { font-family: var(--mono); font-size: 0.9em; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>US HMDA 2022 to 2025 &middot; SQL Playground</h1>
+    <p class="sub">
+      <b>1,754,846</b> mortgage applications from New York State, in fifteen tables,
+      running in your browser. Nothing is installed and nothing is sent to a server.
+    </p>
+  </header>
+
+  <div class="status"><span class="dot loading" id="dot"></span><span id="statusText">Starting the database engine…</span></div>
+
+  <div class="controls">
+    <select id="preset" disabled><option value="">Loading queries…</option></select>
+    <button class="run" id="run" disabled>Run</button>
+    <button id="theme" title="Switch light and dark">Theme</button>
+  </div>
+
+  <textarea id="sql" spellcheck="false" disabled></textarea>
+  <p class="hint">Edit anything here and press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run it.
+  Your changes live in this browser tab only. Picking another query from the list, or
+  reloading the page, brings the original back.</p>
+  <p class="meta" id="meta"></p>
+  <div id="out"></div>
+
+  <footer>
+    <p>The engine is DuckDB compiled to WebAssembly, served from this site rather than
+    a CDN. The data is 82 MB of Parquet in nineteen files, one per table and one per
+    year of the fact table. Where the host supports HTTP range requests, as GitHub Pages
+    does, a query that touches one year fetches roughly that year's bytes rather than
+    the whole dataset.</p>
+    <p>Schema and view names match the PostgreSQL build exactly, so every query here
+    is the query in <code>docs/08_analysis.md</code>, unedited. A parity test in the
+    repository runs all ten against both engines and fails on any difference.</p>
+  </footer>
+</div>
+
+<script type="module">
+import * as duckdb from './vendor/duckdb-browser.mjs';
+
+// The engine is served from this site rather than a CDN, so the playground has
+// no third-party dependency at run time and keeps working if a CDN does not.
+// Cost: 18 MB of WebAssembly in the repository. Only the exception-handling
+// build is shipped; the MVP fallback for pre-2021 browsers is left out.
+// Absolute URLs, not relative ones: the worker resolves mainModule against its
+// own location, so './vendor/duckdb-eh.wasm' becomes /vendor/vendor/... and 404s.
+const BUNDLES = {
+  eh: {
+    mainModule: new URL('vendor/duckdb-eh.wasm', location.href).href,
+    mainWorker: new URL('vendor/duckdb-browser-eh.worker.js', location.href).href,
+  },
+};
+
+const BOOTSTRAP = "-- =====================================================================\n-- Playground bootstrap\n--\n-- Recreates the PostgreSQL schema namespaces over the Parquet exports so\n-- that the queries published in docs/08_analysis.md run here unchanged.\n-- Without this every query would have to be rewritten to read\n-- 'fct_application_2024.parquet' instead of marts.fct_application, and the\n-- repository would be shipping two versions of every query.\n--\n-- The fact view is a UNION ALL over the four year files, which keeps the\n-- partition-level file layout that makes the HTTP range requests efficient\n-- while presenting one table to the user.\n-- =====================================================================\nCREATE SCHEMA IF NOT EXISTS marts;\nCREATE SCHEMA IF NOT EXISTS ref;\n\nCREATE OR REPLACE VIEW marts.fct_application AS\n  SELECT * FROM read_parquet([\n    'data/fct_application_2022.parquet',\n    'data/fct_application_2023.parquet',\n    'data/fct_application_2024.parquet',\n    'data/fct_application_2025.parquet']);\n\nCREATE OR REPLACE VIEW marts.dim_date              AS SELECT * FROM 'data/dim_date.parquet';\nCREATE OR REPLACE VIEW marts.dim_institution       AS SELECT * FROM 'data/dim_institution.parquet';\nCREATE OR REPLACE VIEW marts.dim_tract             AS SELECT * FROM 'data/dim_tract.parquet';\nCREATE OR REPLACE VIEW marts.dim_county            AS SELECT * FROM 'data/dim_county.parquet';\nCREATE OR REPLACE VIEW marts.dim_msa               AS SELECT * FROM 'data/dim_msa.parquet';\nCREATE OR REPLACE VIEW marts.dim_loan_product      AS SELECT * FROM 'data/dim_loan_product.parquet';\nCREATE OR REPLACE VIEW marts.dim_dwelling          AS SELECT * FROM 'data/dim_dwelling.parquet';\nCREATE OR REPLACE VIEW marts.dim_applicant_profile AS SELECT * FROM 'data/dim_applicant_profile.parquet';\n\nCREATE OR REPLACE VIEW marts.br_application_race      AS SELECT * FROM 'data/br_application_race.parquet';\nCREATE OR REPLACE VIEW marts.br_application_ethnicity AS SELECT * FROM 'data/br_application_ethnicity.parquet';\nCREATE OR REPLACE VIEW marts.br_denial_reason         AS SELECT * FROM 'data/br_denial_reason.parquet';\nCREATE OR REPLACE VIEW marts.br_underwriting_system   AS SELECT * FROM 'data/br_underwriting_system.parquet';\nCREATE OR REPLACE VIEW marts.quarantine_application   AS SELECT * FROM 'data/quarantine_application.parquet';\n\nCREATE OR REPLACE VIEW ref.ref_code          AS SELECT * FROM 'data/ref_code.parquet';\nCREATE OR REPLACE VIEW ref.assertion_catalog AS SELECT * FROM 'data/assertion_catalog.parquet';\n\n-- The labelled views from migrations/007_views.sql, so that the analysis\n-- queries can use is_decided / is_denied here exactly as they do in Postgres.\nCREATE OR REPLACE VIEW marts.v_application AS\nSELECT f.activity_year, f.application_sk,\n       i.institution_name,\n       ra.label  AS action_taken_label,\n       pu.label  AS loan_purpose,\n       ap.derived_race     AS applicant_race,\n       ap.derived_ethnicity AS applicant_ethnicity,\n       ap.derived_sex      AS applicant_sex,\n       t.minority_population_pct AS tract_minority_pct,\n       f.census_tract, f.lei,\n       f.loan_amount, f.income_thousands, f.rate_spread, f.interest_rate,\n       f.loan_to_value_ratio, f.debt_to_income_band,\n       (f.action_taken IN ('1','3')) AS is_decided,\n       (f.action_taken = '3')        AS is_denied,\n       (f.action_taken = '1')        AS is_originated,\n       (f.action_taken = '5')        AS is_closed_incomplete\nFROM marts.fct_application f\nJOIN marts.dim_institution i       ON i.activity_year = f.activity_year AND i.lei = f.lei\nJOIN marts.dim_applicant_profile ap ON ap.applicant_profile_sk = f.applicant_profile_sk\nJOIN marts.dim_loan_product p      ON p.loan_product_sk = f.loan_product_sk\nJOIN marts.dim_tract t             ON t.activity_year = f.activity_year AND t.census_tract = f.census_tract\nJOIN ref.ref_code ra ON ra.code_field = 'action_taken' AND ra.code_value = f.action_taken\nJOIN ref.ref_code pu ON pu.code_field = 'loan_purpose' AND pu.code_value = p.loan_purpose;\n\nCREATE OR REPLACE VIEW marts.v_denial_reason AS\nSELECT b.activity_year, b.application_sk, b.reason_ordinal,\n       c.label AS reason, (f.action_taken = '3') AS is_denied\nFROM marts.br_denial_reason b\nJOIN marts.fct_application f ON f.activity_year = b.activity_year AND f.application_sk = b.application_sk\nJOIN ref.ref_code c ON c.code_field = 'denial_reason' AND c.code_value = b.denial_reason_code;\n\nCREATE OR REPLACE VIEW marts.v_application_race AS\nSELECT b.activity_year, b.application_sk, b.party, b.slot,\n       b.race_code, left(b.race_code, 1) AS race_top_level, c.label AS race\nFROM marts.br_application_race b\nLEFT JOIN ref.ref_code c ON c.code_field = 'race' AND c.code_value = b.race_code;\n";
+const FILES     = ["data/assertion_catalog.parquet", "data/br_application_ethnicity.parquet", "data/br_application_race.parquet", "data/br_denial_reason.parquet", "data/br_underwriting_system.parquet", "data/dim_applicant_profile.parquet", "data/dim_county.parquet", "data/dim_date.parquet", "data/dim_dwelling.parquet", "data/dim_institution.parquet", "data/dim_loan_product.parquet", "data/dim_msa.parquet", "data/dim_tract.parquet", "data/fct_application_2022.parquet", "data/fct_application_2023.parquet", "data/fct_application_2024.parquet", "data/fct_application_2025.parquet", "data/quarantine_application.parquet", "data/ref_code.parquet"];
+const QUERIES   = [
+  {
+    "id": "01_denial_by_year",
+    "label": "01. denial by year",
+    "sql": "-- Phase 08 finding 1: the market tightened, then partly recovered.\nSELECT activity_year,\n       count(*)                                                        AS decided,\n       round(100.0*count(*) FILTER (WHERE action_taken='3')/count(*),2) AS denial_pct\nFROM marts.fct_application\nWHERE action_taken IN ('1','3')\nGROUP BY 1\nORDER BY 1;"
+  },
+  {
+    "id": "02_outcome_mix",
+    "label": "02. outcome mix",
+    "sql": "-- Phase 08 section 1: why the denominator has to be decided applications only.\nSELECT f.action_taken, c.label,\n       count(*)                                              AS rows,\n       round(100.0*count(*)/sum(count(*)) OVER (), 1)         AS pct\nFROM marts.fct_application f\nJOIN ref.ref_code c ON c.code_field='action_taken' AND c.code_value=f.action_taken\nGROUP BY 1,2\nORDER BY 3 DESC;"
+  },
+  {
+    "id": "03_denial_by_group",
+    "label": "03. denial by group",
+    "sql": "-- Phase 08 finding 3: outcomes by applicant group, latest year.\nSELECT a.derived_race,\n       count(*)                                                        AS decided,\n       round(100.0*count(*) FILTER (WHERE f.action_taken='3')/count(*),1) AS denial_pct\nFROM marts.fct_application f\nJOIN marts.dim_applicant_profile a ON a.applicant_profile_sk = f.applicant_profile_sk\nWHERE f.action_taken IN ('1','3') AND f.activity_year = 2025\nGROUP BY 1\nORDER BY 2 DESC;"
+  },
+  {
+    "id": "04_gap_within_income",
+    "label": "04. gap within income",
+    "sql": "-- Phase 08 finding 4: the gap survives income.\nWITH d AS (\n  SELECT f.action_taken, f.income_thousands, a.derived_race\n  FROM marts.fct_application f\n  JOIN marts.dim_applicant_profile a ON a.applicant_profile_sk = f.applicant_profile_sk\n  WHERE f.action_taken IN ('1','3') AND f.activity_year = 2025\n    AND f.income_thousands IS NOT NULL\n    AND a.derived_race IN ('White','Black or African American'))\nSELECT CASE WHEN income_thousands <  50 THEN '1. under 50k'\n            WHEN income_thousands < 100 THEN '2. 50-100k'\n            WHEN income_thousands < 150 THEN '3. 100-150k'\n            WHEN income_thousands < 200 THEN '4. 150-200k'\n            ELSE                             '5. 200k+' END AS income_band,\n       round(100.0*count(*) FILTER (WHERE action_taken='3' AND derived_race='Black or African American')\n             /nullif(count(*) FILTER (WHERE derived_race='Black or African American'),0),1) AS black_denial,\n       round(100.0*count(*) FILTER (WHERE action_taken='3' AND derived_race='White')\n             /nullif(count(*) FILTER (WHERE derived_race='White'),0),1)                     AS white_denial\nFROM d GROUP BY 1 ORDER BY 1;"
+  },
+  {
+    "id": "05_shift_share",
+    "label": "05. shift share",
+    "sql": "-- Phase 08 finding 2: mix effect against within-product effect, 2022 to 2023.\nWITH y AS (\n  SELECT f.activity_year AS yr, p.loan_purpose,\n         count(*) FILTER (WHERE f.action_taken IN ('1','3')) AS decided,\n         count(*) FILTER (WHERE f.action_taken = '3')        AS denied\n  FROM marts.fct_application f\n  JOIN marts.dim_loan_product p ON p.loan_product_sk = f.loan_product_sk\n  WHERE f.activity_year IN (2022, 2023)\n  GROUP BY 1,2),\nt AS (SELECT yr, sum(decided) AS tot FROM y GROUP BY 1),\nj AS (SELECT y.loan_purpose,\n        max(CASE WHEN yr=2022 THEN 1.0*y.decided/t.tot   END) AS w22,\n        max(CASE WHEN yr=2023 THEN 1.0*y.decided/t.tot   END) AS w23,\n        max(CASE WHEN yr=2022 THEN 1.0*y.denied/y.decided END) AS r22,\n        max(CASE WHEN yr=2023 THEN 1.0*y.denied/y.decided END) AS r23\n      FROM y JOIN t USING (yr) GROUP BY 1)\nSELECT round(100*sum((w23-w22)*r22), 3) AS mix_effect,\n       round(100*sum(w23*(r23-r22)), 3) AS within_effect,\n       round(100*(sum((w23-w22)*r22) + sum(w23*(r23-r22))), 3) AS total_change\nFROM j;"
+  },
+  {
+    "id": "06_within_tract",
+    "label": "06. within tract",
+    "sql": "-- Phase 08 finding 6: the gap survives the neighbourhood.\nWITH t AS (\n  SELECT f.census_tract,\n    100.0*count(*) FILTER (WHERE f.action_taken='3' AND a.derived_race='Black or African American')\n      /nullif(count(*) FILTER (WHERE a.derived_race='Black or African American'),0) AS rb,\n    100.0*count(*) FILTER (WHERE f.action_taken='3' AND a.derived_race='White')\n      /nullif(count(*) FILTER (WHERE a.derived_race='White'),0)                     AS rw\n  FROM marts.fct_application f\n  JOIN marts.dim_applicant_profile a ON a.applicant_profile_sk = f.applicant_profile_sk\n  WHERE f.action_taken IN ('1','3') AND f.census_tract <> 'UNKNOWN'\n    AND a.derived_race IN ('White','Black or African American')\n  GROUP BY 1\n  HAVING count(*) FILTER (WHERE a.derived_race='Black or African American') >= 100\n     AND count(*) FILTER (WHERE a.derived_race='White') >= 100)\nSELECT count(*)                                  AS tracts,\n       count(*) FILTER (WHERE rb > rw)           AS black_rate_higher,\n       round(CAST(percentile_cont(0.5) WITHIN GROUP (ORDER BY rb-rw) AS numeric), 1) AS median_gap_points\nFROM t;"
+  },
+  {
+    "id": "07_lender_spread",
+    "label": "07. lender spread",
+    "sql": "-- Phase 08 finding 8: lenders differ from each other more than the market moves.\nWITH lt AS (\n  SELECT census_tract, lei, count(*) AS decided,\n         100.0*count(*) FILTER (WHERE action_taken='3')/count(*) AS rate\n  FROM marts.fct_application\n  WHERE action_taken IN ('1','3') AND census_tract <> 'UNKNOWN'\n  GROUP BY 1,2\n  HAVING count(*) >= 30)\nSELECT count(*) AS tracts,\n       round(CAST(percentile_cont(0.25) WITHIN GROUP (ORDER BY spread) AS numeric), 1) AS p25,\n       round(CAST(percentile_cont(0.50) WITHIN GROUP (ORDER BY spread) AS numeric), 1) AS median,\n       round(CAST(percentile_cont(0.75) WITHIN GROUP (ORDER BY spread) AS numeric), 1) AS p75,\n       round(CAST(max(spread) AS numeric), 1)                                          AS max_spread\nFROM (SELECT census_tract, max(rate)-min(rate) AS spread\n      FROM lt GROUP BY 1 HAVING count(*) >= 4) s;"
+  },
+  {
+    "id": "08_race_rollup_trap",
+    "label": "08. race rollup trap",
+    "sql": "-- Phase 06 section 4.1: HMDA race codes are hierarchical, so subcategories\n-- must be rolled up to their parent before counting distinct races.\n-- Written with left(...) rather than a regex on purpose: see phase 10.\nSELECT\n  (SELECT count(*) FROM (\n     SELECT activity_year, application_sk FROM marts.br_application_race\n     WHERE party='applicant'\n     GROUP BY 1,2 HAVING count(DISTINCT race_code) > 1) z)            AS naive_count,\n  (SELECT count(*) FROM (\n     SELECT activity_year, application_sk FROM marts.br_application_race\n     WHERE party='applicant' AND left(race_code,1) IN ('1','2','3','4','5')\n     GROUP BY 1,2 HAVING count(DISTINCT left(race_code,1)) > 1) z)    AS rolled_up_count;"
+  },
+  {
+    "id": "09_incompleteness_channel",
+    "label": "09. incompleteness channel",
+    "sql": "-- Phase 08 finding 9: denial is not the only channel.\nSELECT i.institution_name,\n       count(*)                                                          AS applications,\n       round(100.0*count(*) FILTER (WHERE f.action_taken='5')/count(*),1) AS closed_incomplete_pct\nFROM marts.fct_application f\nJOIN marts.dim_institution i ON i.activity_year = f.activity_year AND i.lei = f.lei\nGROUP BY 1\nHAVING count(*) >= 20000\nORDER BY 3 DESC;"
+  },
+  {
+    "id": "10_reconciliation",
+    "label": "10. reconciliation",
+    "sql": "-- Phase 06 section 1: nothing was deleted.\nSELECT (SELECT count(*) FROM marts.fct_application)        AS modelled,\n       (SELECT count(*) FROM marts.quarantine_application) AS quarantined,\n       (SELECT count(*) FROM marts.fct_application)\n     + (SELECT count(*) FROM marts.quarantine_application) AS total_published;"
+  }
+];
+
+const $ = id => document.getElementById(id);
+const dot = $('dot'), statusText = $('statusText'), preset = $('preset');
+const sqlBox = $('sql'), runBtn = $('run'), meta = $('meta'), out = $('out');
+
+function setStatus(text, state) {
+  statusText.textContent = text;
+  dot.className = 'dot ' + (state || '');
+}
+
+$('theme').onclick = () => {
+  const now = document.documentElement.getAttribute('data-theme');
+  const next = now === 'dark' ? 'light' : now === 'light' ? 'dark'
+    : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark');
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('hmda-theme', next); } catch (e) { /* private mode */ }
+};
+try {
+  const saved = localStorage.getItem('hmda-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch (e) { /* private mode */ }
+
+let conn = null;
+
+async function boot() {
+  try {
+    const bundle = await duckdb.selectBundle(BUNDLES);
+    const worker = new Worker(bundle.mainWorker);
+    const db = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+
+    setStatus('Registering the data files…', 'loading');
+    for (const name of FILES) {
+      // Last argument is directIO. true makes DuckDB issue HTTP range requests
+      // and read only the row groups it needs, which sounds obviously right and
+      // measured worse: it does not cache what it reads, so one year-filtered
+      // count re-fetched 142 MB. false buffers each file once, so the cost is
+      // the 82 MB download at startup and zero bytes per query after that.
+      // Phase 10 section 5 has the numbers.
+      await db.registerFileURL(name, new URL(name, location.href).href,
+                               duckdb.DuckDBDataProtocol.HTTP, false);
+    }
+
+    conn = await db.connect();
+    setStatus('Creating the schemas and views…', 'loading');
+    for (const stmt of BOOTSTRAP.split(/;\s*(?:\r?\n|$)/)) {
+      const s = stmt.replace(/^\s*(--[^\n]*\n)+/g, '').trim();
+      if (s) await conn.query(s);
+    }
+
+    QUERIES.forEach((q, i) => {
+      const o = document.createElement('option');
+      o.value = String(i); o.textContent = q.label;
+      preset.appendChild(o);
+    });
+    preset.firstChild.remove();
+    preset.value = '0';
+    sqlBox.value = QUERIES[0].sql;
+
+    preset.disabled = sqlBox.disabled = runBtn.disabled = false;
+    setStatus('Ready. 1,754,846 rows, 15 tables, in this tab.', 'ready');
+    await runQuery();
+  } catch (err) {
+    setStatus('The engine could not start.', 'error');
+    out.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.className = 'error';
+    pre.textContent = String(err && err.message ? err.message : err);
+    out.appendChild(pre);
+  }
+}
+
+preset.onchange = () => {
+  const q = QUERIES[Number(preset.value)];
+  if (q) { sqlBox.value = q.sql; runQuery(); }
+};
+runBtn.onclick = runQuery;
+sqlBox.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runQuery(); }
+});
+
+function isNumeric(v) {
+  return typeof v === 'number' || typeof v === 'bigint';
+}
+// Thousands separators help on counts and hurt on years, so a column whose
+// name mentions a year is printed as digits. 2022, not 2,022.
+function fmt(v, col) {
+  if (v === null || v === undefined) return '';
+  if (typeof v !== 'number' && typeof v !== 'bigint') return String(v);
+  if (/year|yr$/i.test(col)) return String(v);
+  if (typeof v === 'bigint') return v.toLocaleString();
+  return Number.isInteger(v) ? v.toLocaleString() : String(v);
+}
+
+async function runQuery() {
+  if (!conn) return;
+  const sql = sqlBox.value.trim();
+  if (!sql) return;
+  runBtn.disabled = true;
+  meta.textContent = 'Running…';
+  out.innerHTML = '';
+  const t0 = performance.now();
+  try {
+    const table = await conn.query(sql);
+    const ms = performance.now() - t0;
+    const rows = table.toArray();
+    const cols = table.schema.fields.map(f => f.name);
+
+    const shown = rows.slice(0, 500);
+    const numeric = cols.map((c, i) => shown.length > 0 && isNumeric(shown[0][c]));
+
+    const t = document.createElement('table');
+    const thead = t.createTHead().insertRow();
+    cols.forEach((c, i) => {
+      const th = document.createElement('th');
+      th.textContent = c;
+      if (numeric[i]) th.className = 'num';
+      thead.appendChild(th);
+    });
+    const tb = t.createTBody();
+    for (const r of shown) {
+      const tr = tb.insertRow();
+      cols.forEach((c, i) => {
+        const td = tr.insertCell();
+        td.textContent = fmt(r[c], c);
+        if (numeric[i]) td.className = 'num';
+      });
+    }
+    const scroller = document.createElement('div');
+    scroller.className = 'scroller';
+    scroller.appendChild(t);
+    out.appendChild(scroller);
+
+    meta.textContent = `${rows.length.toLocaleString()} row${rows.length === 1 ? '' : 's'} in ${ms.toFixed(0)} ms`
+      + (rows.length > shown.length ? ` · showing the first ${shown.length}` : '');
+  } catch (err) {
+    const pre = document.createElement('pre');
+    pre.className = 'error';
+    pre.textContent = String(err && err.message ? err.message : err);
+    out.appendChild(pre);
+    meta.innerHTML = '<span class="bad">The query did not run.</span>';
+  } finally {
+    runBtn.disabled = false;
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

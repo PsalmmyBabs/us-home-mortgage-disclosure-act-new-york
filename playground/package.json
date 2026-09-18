@@ -1,0 +1,24 @@
+{
+  "name": "hmda-sql-playground",
+  "private": true,
+  "description": "Bundle the DuckDB WASM engine into vendor/. The site itself is built by build_page.py.",
+  "scripts": {
+    "vendor": "esbuild vendor_entry.js --bundle --format=esm --minify --outfile=vendor/duckdb-browser.mjs && node copy_engine.js"
+  },
+  "devDependencies": {
+    "@duckdb/duckdb-wasm": "1.28.0",
+    "apache-arrow": "17.0.0",
+    "esbuild": "0.28.2"
+  },
+  "comment": [
+    "duckdb-wasm is pinned to 1.28.0 on purpose. From 1.29.0 the Parquet reader",
+    "is a dynamically loaded extension, so the page fetches",
+    "extensions.duckdb.org/v1.1.1/wasm_eh/parquet.duckdb_extension.wasm at startup",
+    "and fails with 'table index is out of bounds' when that host is unreachable.",
+    "1.28.0 links Parquet statically, which keeps the site self-contained.",
+    "apache-arrow is a peer dependency of duckdb-wasm and has to be present for",
+    "the esbuild bundle to resolve; the published .mjs imports it as a bare specifier.",
+    "The engine files are copied by copy_engine.js rather than by 'cp' in this script, because npm runs scripts through the platform shell and cmd.exe has no cp. With cp the bundle step succeeded on Windows and the copy silently did nothing.",
+    "There is deliberately no combined 'build' script: it would have to name python or python3, and which one exists differs between Windows and everywhere else. build_page.py is run directly instead."
+  ]
+}

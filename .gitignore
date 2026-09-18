@@ -1,0 +1,20 @@
+# Build inputs and tooling, not build outputs.
+# docs/playground/ IS committed: it is the published site.
+
+playground/node_modules/
+playground/parquet/
+playground/tmp/
+playground/site/
+playground/package-lock.json
+
+# The published loan registers are 638 MB and are downloaded, not committed.
+# RUNBOOK.md names the exact files and vintages.
+/data/
+*.csv
+!seed/lender_file_2022_2025.csv
+
+# Local noise
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/
