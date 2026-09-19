@@ -139,4 +139,4 @@ The published register is modified by the Bureau to protect applicant privacy. T
 
 ---
 
-Built by [Samuel Babajide](https://github.com/PsalmmyBabs). Questions and corrections are welcome in the issues.
+Built by Samuel Babajide [LinkedIn](https://linkedin.com/in/samuelbbabajide) · [GitHub](https://github.com/PsalmmyBabs). Questions and corrections are welcome in the issues.
