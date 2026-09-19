@@ -2,7 +2,7 @@
 
 A PostgreSQL analytics project on 1,755,419 real mortgage applications, built from published regulatory data, documented as ten phases, and **runnable in your browser without installing anything**.
 
-### ▶ [Open the playground](https://YOUR-USERNAME.github.io/hmda-ny/playground/) · [Browse the data dictionary](https://YOUR-USERNAME.github.io/hmda-ny/catalog/)
+### ▶ [Open the playground](https://PsalmmyBabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/) · [Browse the data dictionary](https://PsalmmyBabs.github.io/us-home-mortgage-disclosure-act-new-york/catalog/)
 
 The playground gives you fifteen tables, a SQL box and the ten queries below, running in your browser. Nothing is installed, no account is created, and no data leaves your machine. The data dictionary documents every table, column, key and index, generated from the live catalogue rather than written by hand.
 
@@ -139,4 +139,4 @@ The published register is modified by the Bureau to protect applicant privacy. T
 
 ---
 
-Built by [Samuel Babajide](https://github.com/YOUR-USERNAME). Questions and corrections are welcome in the issues.
+Built by [Samuel Babajide](https://github.com/PsalmmyBabs). Questions and corrections are welcome in the issues.
