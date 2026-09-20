@@ -123,7 +123,7 @@ GROUP BY 1 ORDER BY 2 DESC;
 | White | 197,892 | 22.4% |
 | Asian | 27,956 | 24.5% |
 | Race not available | 52,526 | 27.8% |
-| **Black or African American** | 22,523 | **39.6%** |
+| Black or African American | 22,523 | 39.6% |
 | American Indian or Alaska Native | 1,308 | 45.0% |
 | Native Hawaiian or Other Pacific Islander | 583 | 49.9% |
 
