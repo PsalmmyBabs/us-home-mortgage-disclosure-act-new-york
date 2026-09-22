@@ -195,8 +195,11 @@ async function boot() {
       preset.appendChild(o);
     });
     preset.firstChild.remove();
-    preset.value = '0';
-    sqlBox.value = QUERIES[0].sql;
+    // A link can point at one query: .../playground/#q=03 opens with query 03
+    // loaded and already run, so a reader checking a figure quoted in the README
+    // lands on the evidence rather than on a dropdown they have to search.
+    preset.value = String(indexForHash());
+    sqlBox.value = QUERIES[Number(preset.value)].sql;
 
     preset.disabled = sqlBox.disabled = runBtn.disabled = false;
     setStatus('Ready. 1,754,846 rows, 15 tables, in this tab.', 'ready');
@@ -211,10 +214,29 @@ async function boot() {
   }
 }
 
+// #q=03 selects query 03. An unknown or absent value falls back to the first
+// query, so a mistyped link still gives the reader a working page.
+function indexForHash() {
+  const want = (location.hash.match(/q=0*(\d+)/) || [])[1];
+  if (!want) return 0;
+  const i = QUERIES.findIndex(q => Number(q.id.split('_')[0]) === Number(want));
+  return i < 0 ? 0 : i;
+}
+
 preset.onchange = () => {
   const q = QUERIES[Number(preset.value)];
   if (q) { sqlBox.value = q.sql; runQuery(); }
 };
+
+// Following a second link from the same page changes only the hash, which does
+// not reload, so the selection has to be reapplied here.
+window.addEventListener('hashchange', () => {
+  if (!conn) return;
+  const i = indexForHash();
+  preset.value = String(i);
+  sqlBox.value = QUERIES[i].sql;
+  runQuery();
+});
 runBtn.onclick = runQuery;
 sqlBox.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); runQuery(); }

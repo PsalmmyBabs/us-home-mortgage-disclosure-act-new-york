@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US HMDA Entity Relationship Diagram</title>
+<meta name="description" content="The star schema behind the HMDA New York analytics project: one partitioned fact table, eight dimensions, four bridges.">
+<style>
+  :root {
+    --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e3e0da;
+    --accent:#8a5a2b; --soft:#f2ece4; --rel:#b9b2a6;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+    --bg:#171614; --panel:#1f1e1b; --ink:#ece9e3; --muted:#9c978e; --line:#322f2a;
+    --accent:#d9a468; --soft:#2a2520; --rel:#4e4941;}}
+  :root[data-theme=dark]{
+    --bg:#171614; --panel:#1f1e1b; --ink:#ece9e3; --muted:#9c978e; --line:#322f2a;
+    --accent:#d9a468; --soft:#2a2520; --rel:#4e4941;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);
+       -webkit-text-size-adjust:100%}
+  a{color:var(--accent)}
+  .wrap{max-width:1340px;margin:0 auto;padding:34px 16px 70px}
+  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px;
+          display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  h1{font-size:1.45rem;letter-spacing:-0.02em;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0;max-width:74ch;font-size:0.92rem}
+  .spacer{flex:1}
+  button{font:inherit;font-size:0.85rem;color:var(--ink);background:var(--panel);
+    border:1px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer}
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:11px;
+             background:var(--panel);padding:8px}
+  svg{display:block;width:100%;min-width:1040px;height:auto}
+  .rel{stroke:var(--rel);stroke-width:1.4;fill:none}
+  .many{fill:var(--rel)}
+  .lbl{fill:var(--panel);stroke:var(--line);stroke-width:1}
+  .lbltxt{fill:var(--muted);font:500 10.5px var(--mono);text-anchor:middle}
+  g rect{fill:var(--panel);stroke:var(--line);stroke-width:1.4}
+  .b-fact rect{stroke:var(--accent);stroke-width:2.2;fill:var(--soft)}
+  .b-br rect{stroke-dasharray:none}
+  .b-side rect{stroke-dasharray:5 4}
+  .bt{fill:var(--ink);font:700 13.5px var(--mono)}
+  .b-fact .bt{fill:var(--accent);font-size:15px}
+  .bl{fill:var(--muted);font:11.5px var(--sans)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0 30px;font-size:0.85rem;
+           color:var(--muted)}
+  .legend span{display:flex;gap:7px;align-items:center}
+  .sw{width:22px;height:13px;border-radius:3px;border:1.6px solid var(--line);
+       background:var(--panel);display:inline-block}
+  .sw.f{border-color:var(--accent);background:var(--soft)}
+  .sw.s{border-style:dashed}
+  h2{font-size:1.05rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  table{border-collapse:collapse;width:100%;font-size:0.86rem}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--soft);font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;
+     font-weight:600;white-space:nowrap}
+  td.m{font-family:var(--mono);font-size:0.82rem;white-space:nowrap}
+  td.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);
+        font-size:0.82rem;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  .note{color:var(--muted);font-size:0.88rem;max-width:74ch}
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>US HMDA Entity Relationship Diagram</h1>
+    <p class="sub">One partitioned fact table, eight dimensions, four bridges, a quarantine
+    table and a code reference. Drawn from the foreign keys as they exist in the database,
+    not from a design document.</p>
+  </div>
+  <div class="spacer"></div>
+  <button id="theme">Theme</button>
+</header>
+
+<div class="scroller">
+<svg viewBox="0 0 1300 900" role="img" aria-label="Entity relationship diagram">
+<line class="rel" x1="546" y1="290" x2="374" y2="158"/><circle class="many" cx="546" cy="290" r="4.5"/><rect class="lbl" x="404" y="215" width="111" height="18" rx="4"/><text class="lbltxt" x="460" y="228">loan_product_sk</text>
+<line class="rel" x1="648" y1="290" x2="646" y2="158"/><circle class="many" cx="648" cy="290" r="4.5"/><rect class="lbl" x="605" y="215" width="85" height="18" rx="4"/><text class="lbltxt" x="647" y="228">dwelling_sk</text>
+<line class="rel" x1="751" y1="290" x2="918" y2="158"/><circle class="many" cx="751" cy="290" r="4.5"/><rect class="lbl" x="763" y="215" width="144" height="18" rx="4"/><text class="lbltxt" x="835" y="228">applicant_profile_sk</text>
+<line class="rel" x1="515" y1="350" x2="290" y2="316"/><circle class="many" cx="515" cy="350" r="4.5"/><rect class="lbl" x="337" y="324" width="131" height="18" rx="4"/><text class="lbltxt" x="402" y="337">activity_year, lei</text>
+<line class="rel" x1="515" y1="398" x2="290" y2="446"/><circle class="many" cx="515" cy="398" r="4.5"/><rect class="lbl" x="354" y="413" width="98" height="18" rx="4"/><text class="lbltxt" x="402" y="426">activity_year</text>
+<line class="rel" x1="785" y1="350" x2="1010" y2="316"/><circle class="many" cx="785" cy="350" r="4.5"/><rect class="lbl" x="802" y="324" width="190" height="18" rx="4"/><text class="lbltxt" x="898" y="337">activity_year, census_tract</text>
+<line class="rel" x1="285" y1="640" x2="542" y2="450"/><circle class="many" cx="285" cy="640" r="4.5"/>
+<line class="rel" x1="494" y1="640" x2="604" y2="450"/><circle class="many" cx="494" cy="640" r="4.5"/>
+<line class="rel" x1="702" y1="640" x2="665" y2="450"/><circle class="many" cx="702" cy="640" r="4.5"/>
+<line class="rel" x1="910" y1="640" x2="727" y2="450"/><circle class="many" cx="910" cy="640" r="4.5"/>
+<line class="rel" x1="1120" y1="348" x2="1120" y2="400"/><circle class="many" cx="1120" cy="348" r="4.5"/><rect class="lbl" x="1028" y="365" width="184" height="18" rx="4"/><text class="lbltxt" x="1120" y="378">activity_year, county_code</text>
+<line class="rel" x1="1120" y1="498" x2="1120" y2="550"/><circle class="many" cx="1120" cy="498" r="4.5"/><rect class="lbl" x="1045" y="515" width="151" height="18" rx="4"/><text class="lbltxt" x="1120" y="528">activity_year, msa_md</text>
+<rect class="lbl" x="392" y="596" width="516" height="20" rx="5"/>
+<text class="lbltxt" x="650" y="610">all four bridges join on (activity_year, application_sk), ON DELETE CASCADE</text>
+<g class="b-fact"><rect x="515" y="290" width="270" height="160" rx="9"/><text class="bt" x="529" y="316">marts.fct_application</text><text class="bl" x="529" y="338">PK activity_year, application_sk</text><text class="bl" x="529" y="356">business key row_hash + dup_seq</text><text class="bl" x="529" y="374">LIST partitioned by activity_year</text><text class="bl" x="529" y="392">4 partitions  ·  41 cols</text><text class="bl" x="529" y="410">1,754,846 rows</text></g>
+<g class="b-dim"><rect x="200" y="60" width="220" height="98" rx="9"/><text class="bt" x="214" y="86">dim_loan_product</text><text class="bl" x="214" y="108">PK loan_product_sk</text><text class="bl" x="214" y="126">194 rows  ·  8 cols</text><text class="bl" x="214" y="144">junk dimension</text></g>
+<g class="b-dim"><rect x="535" y="60" width="220" height="98" rx="9"/><text class="bt" x="549" y="86">dim_dwelling</text><text class="bl" x="549" y="108">PK dwelling_sk</text><text class="bl" x="549" y="126">41 rows  ·  5 cols</text><text class="bl" x="549" y="144">junk dimension</text></g>
+<g class="b-dim"><rect x="870" y="60" width="220" height="98" rx="9"/><text class="bt" x="884" y="86">dim_applicant_profile</text><text class="bl" x="884" y="108">PK applicant_profile_sk</text><text class="bl" x="884" y="126">4,745 rows  ·  10 cols</text></g>
+<g class="b-dim"><rect x="70" y="250" width="220" height="98" rx="9"/><text class="bt" x="84" y="276">dim_institution</text><text class="bl" x="84" y="298">PK activity_year, lei</text><text class="bl" x="84" y="316">19,321 rows  ·  16 cols</text><text class="bl" x="84" y="334">year-keyed</text></g>
+<g class="b-dim"><rect x="70" y="420" width="220" height="98" rx="9"/><text class="bt" x="84" y="446">dim_date</text><text class="bl" x="84" y="468">PK activity_year</text><text class="bl" x="84" y="486">4 rows  ·  5 cols</text></g>
+<g class="b-dim"><rect x="1010" y="250" width="220" height="98" rx="9"/><text class="bt" x="1024" y="276">dim_tract</text><text class="bl" x="1024" y="298">PK activity_year, census_tract</text><text class="bl" x="1024" y="316">20,820 rows  ·  10 cols</text><text class="bl" x="1024" y="334">year-keyed</text></g>
+<g class="b-dim"><rect x="1010" y="400" width="220" height="98" rx="9"/><text class="bt" x="1024" y="426">dim_county</text><text class="bl" x="1024" y="448">PK activity_year, county_code</text><text class="bl" x="1024" y="466">255 rows  ·  4 cols</text></g>
+<g class="b-dim"><rect x="1010" y="550" width="220" height="98" rx="9"/><text class="bt" x="1024" y="576">dim_msa</text><text class="bl" x="1024" y="598">PK activity_year, msa_md</text><text class="bl" x="1024" y="616">1,666 rows  ·  4 cols</text></g>
+<g class="b-br"><rect x="120" y="640" width="220" height="82" rx="9"/><text class="bt" x="134" y="666">br_application_race</text><text class="bl" x="134" y="688">PK yr, app_sk, party, slot</text><text class="bl" x="134" y="706">3,662,829 rows</text></g>
+<g class="b-br"><rect x="360" y="640" width="220" height="82" rx="9"/><text class="bt" x="374" y="666">br_application_ethnicity</text><text class="bl" x="374" y="688">PK yr, app_sk, party, slot</text><text class="bl" x="374" y="706">3,597,440 rows</text></g>
+<g class="b-br"><rect x="600" y="640" width="220" height="82" rx="9"/><text class="bt" x="614" y="666">br_underwriting_system</text><text class="bl" x="614" y="688">PK yr, app_sk, aus_ordinal</text><text class="bl" x="614" y="706">1,075,534 rows</text></g>
+<g class="b-br"><rect x="840" y="640" width="220" height="82" rx="9"/><text class="bt" x="854" y="666">br_denial_reason</text><text class="bl" x="854" y="688">PK yr, app_sk, reason_ordinal</text><text class="bl" x="854" y="706">438,591 rows</text></g>
+<g class="b-side"><rect x="120" y="780" width="220" height="82" rx="9"/><text class="bt" x="134" y="806">quarantine_application</text><text class="bl" x="134" y="828">no PK  ·  573 rows  ·  43 cols</text><text class="bl" x="134" y="846">rows that could not be true</text></g>
+<g class="b-side"><rect x="600" y="780" width="220" height="82" rx="9"/><text class="bt" x="614" y="806">ref.ref_code</text><text class="bl" x="614" y="828">PK code_field, code_value</text><text class="bl" x="614" y="846">450 rows across 54 columns</text></g>
+</svg>
+</div>
+
+<div class="legend">
+  <span><i class="sw f"></i> fact</span>
+  <span><i class="sw"></i> dimension or bridge</span>
+  <span><i class="sw s"></i> not joined by a foreign key</span>
+  <span>&#9679; marks the many side</span>
+  <span>Line labels are the join columns.</span>
+</div>
+
+<h2>Why the keys look like this</h2>
+<p class="note">Three things in the diagram are worth a sentence each.
+<b>Most keys carry <code>activity_year</code>.</b> A lender's asset size, a tract's median
+income and an MSA's name all change between years, so a key of <code>lei</code> alone would
+silently mix vintages. <b>Four relationships are bridges, not columns.</b> HMDA lets a filer
+record up to five races and five ethnicities for each of two parties, four denial reasons and
+several underwriting systems, so flattening them into the fact table would break first normal
+form and overstate multi-race applicants. <b>The fact table has no natural key.</b> The Bureau
+strips every loan identifier before publication, so the business key is an <code>md5</code> of
+the source row plus an occurrence number, which makes it reproducible across rebuilds.</p>
+
+<h2>The fifteen tables</h2>
+<div class="tw">
+<table>
+  <tr><th>table</th><th>role</th><th>rows</th><th>cols</th><th>grain</th></tr>
+  
+<tr><td class="m">fct_application</td><td>fact</td><td class="n">1,754,846</td><td class="n">41</td>
+<td>One filed application as published. Partitioned by year.</td></tr>
+<tr><td class="m">dim_institution</td><td>dimension</td><td class="n">19,321</td><td class="n">16</td>
+<td>The lender, with asset size, CRA rating and holding company.</td></tr>
+<tr><td class="m">dim_tract</td><td>dimension</td><td class="n">20,820</td><td class="n">10</td>
+<td>Census tract, with population and income characteristics.</td></tr>
+<tr><td class="m">dim_county</td><td>dimension</td><td class="n">255</td><td class="n">4</td>
+<td>County, rolling up to an MSA.</td></tr>
+<tr><td class="m">dim_msa</td><td>dimension</td><td class="n">1,666</td><td class="n">4</td>
+<td>Metropolitan or micropolitan statistical area.</td></tr>
+<tr><td class="m">dim_date</td><td>dimension</td><td class="n">4</td><td class="n">5</td>
+<td>The reporting year and its publication vintage.</td></tr>
+<tr><td class="m">dim_loan_product</td><td>dimension</td><td class="n">194</td><td class="n">8</td>
+<td>Junk dimension: the 194 combinations of seven product codes that actually occur.</td></tr>
+<tr><td class="m">dim_dwelling</td><td>dimension</td><td class="n">41</td><td class="n">5</td>
+<td>Junk dimension: the 41 property type combinations that actually occur.</td></tr>
+<tr><td class="m">dim_applicant_profile</td><td>dimension</td><td class="n">4,745</td><td class="n">10</td>
+<td>The derived applicant characteristics, deduplicated.</td></tr>
+<tr><td class="m">br_application_race</td><td>bridge</td><td class="n">3,662,829</td><td class="n">5</td>
+<td>One row per race recorded, per party. HMDA allows five each for applicant and co-applicant.</td></tr>
+<tr><td class="m">br_application_ethnicity</td><td>bridge</td><td class="n">3,597,440</td><td class="n">5</td>
+<td>One row per ethnicity recorded, per party.</td></tr>
+<tr><td class="m">br_underwriting_system</td><td>bridge</td><td class="n">1,075,534</td><td class="n">4</td>
+<td>One row per automated underwriting system consulted.</td></tr>
+<tr><td class="m">br_denial_reason</td><td>bridge</td><td class="n">438,591</td><td class="n">4</td>
+<td>One row per denial reason given. Up to four are allowed.</td></tr>
+<tr><td class="m">quarantine_application</td><td>quarantine</td><td class="n">573</td><td class="n">43</td>
+<td>Rows that could not be true, held with the rule each one broke rather than dropped.</td></tr>
+<tr><td class="m">ref.ref_code</td><td>reference</td><td class="n">450</td><td class="n">3</td>
+<td>Code to label mappings for 54 coded columns, from the published filing instructions.</td></tr>
+
+</table>
+</div>
+<p class="note" style="margin-top:14px">Two further reference tables sit outside the star:
+<code>ref.assertion_catalog</code> describes each quality assertion, and
+<code>ref.ref_source_vintage</code> records which publication vintage each year was taken from.
+Every column of every table, with its type, constraints and description, is in the
+<a href="../catalog/">data dictionary</a>.</p>
+
+</div>
+<script>
+const b = document.getElementById('theme');
+const root = document.documentElement;
+b.onclick = () => {
+  const dark = getComputedStyle(root).getPropertyValue('--bg').trim() === '#171614';
+  root.setAttribute('data-theme', dark ? 'light' : 'dark');
+};
+</script>
+</body>
+</html>
