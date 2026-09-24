@@ -10,7 +10,7 @@ Every table links to the browser playground, which opens with that query loaded 
 
 ## 1. The denominator decision, which comes before every number
 
-[▶ query 14](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=14)
+[▶ query 14](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=14)
 
 HMDA records eight possible outcomes for an application, and only two of them are a lender's credit decision:
 
@@ -40,7 +40,7 @@ Every figure below uses `is_decided` as the denominator. Getting this wrong is t
 
 ## 2. Finding 1: the market tightened, then partly recovered
 
-[▶ query 13](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=13)
+[▶ query 13](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=13)
 
 ```sql
 SELECT activity_year,
@@ -64,7 +64,7 @@ Decided volume falls by 31 percent from 2022 to 2023 as rates rise, and the deni
 
 ## 3. Finding 2: what caused the 2023 deterioration, and where I was wrong
 
-[▶ query 17](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=17)
+[▶ query 17](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=17)
 
 **I predicted this incorrectly before measuring it, and the correction is more instructive than the result.**
 
@@ -115,7 +115,7 @@ The lesson is the one worth keeping: an aggregate can move for two completely di
 
 ## 4. Finding 3: outcomes differ sharply by applicant group
 
-[▶ query 15](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=15)
+[▶ query 15](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=15)
 
 ```sql
 SELECT a.derived_race,
@@ -174,7 +174,7 @@ Either way, the number on its own is close to meaningless, because applicants di
 
 ## 5. Finding 4: the gap survives income
 
-[▶ query 16](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=16)
+[▶ query 16](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=16)
 
 Banding income and pivoting the bands into columns keeps every group on one line. One pass, no self-joins, using `FILTER` twice per cell:
 
@@ -247,7 +247,7 @@ Home improvement is the finding inside the finding. It is the second largest pro
 
 ## 7. Finding 6: it survives geography, measured two ways
 
-[▶ query 18](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=18)
+[▶ query 18](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=18)
 
 First, denial rises with the minority share of the neighbourhood:
 
@@ -330,7 +330,7 @@ The generalisation is not perfectly uniform, and the exception is worth naming: 
 
 ## 9. Finding 8: lenders differ from each other more than they differ from their own average
 
-[▶ query 19](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=19)
+[▶ query 19](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=19)
 
 This one reframes everything above, and it is the most useful finding in the project for anyone who has to act.
 
@@ -364,7 +364,7 @@ It is also the finding with a direct implication, because it is the one an indiv
 
 ## 10. Finding 9: denial is not the only channel
 
-[▶ query 21](https://psalmmybabs.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=21)
+[▶ query 21](https://samuelbabajide.github.io/us-home-mortgage-disclosure-act-new-york/playground/#q=21)
 
 4.47 percent of all applications, 78,521 of them, end in "file closed for incompleteness" rather than a decision. That is not a denial, so it is invisible to every number in this document.
 
